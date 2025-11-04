@@ -12,9 +12,9 @@
 import json
 import os
 from typing import List
-
 import click
 import google.generativeai as genai
+from google.oauth2.service_account import Credentials
 import requests
 from loguru import logger
 
@@ -35,7 +35,7 @@ def check_required_env_vars():
 
 def get_review_prompt(extra_prompt: str = "") -> str:
     """Get a prompt template"""
-    template = f"""
+    template = """
     This is a pull request or part of a pull request if the pull request is very large.
     Suppose you review this PR as an excellent software engineer and an excellent security engineer.
     Can you tell me the issues with differences in a pull request and provide suggestions to improve it?
@@ -106,7 +106,7 @@ def get_review(
         "top_k": 0,
         "max_output_tokens": 8192,
     }
-    genai_model = genai.GenerativeModel(model_name=model,generation_config=generation_config,system_instruction=extra_prompt)
+    genai_model = genai.GenerativeModel(model_name=model, generation_config=generation_config, system_instruction=extra_prompt)
     # Get summary by chunk
     chunked_reviews = []
     for chunked_diff in chunked_diff_list:
@@ -185,7 +185,20 @@ def main(
 
     # Set the Gemini API key
     api_key = os.getenv("GEMINI_API_KEY")
-    genai.configure(api_key=api_key)
+    service_account_file = os.getenv("GEMINI_SERVICE_ACCOUNT_FILE")
+    if api_key is None or api_key == "":
+        # configure with service account credential file
+        credentials_dict = json.loads(service_account_file)
+        credentials = Credentials.from_service_account_info(
+            credentials_dict,
+            scopes=["https://www.googleapis.com/auth/cloud-platform"]
+        )
+        credentials = Credentials.from_service_account_file(
+            service_account_file,
+        )
+        genai.configure(credentials=credentials)
+    else:
+        genai.configure(api_key=api_key)
 
     # Request a code review
     chunked_reviews, summarized_review = get_review(
