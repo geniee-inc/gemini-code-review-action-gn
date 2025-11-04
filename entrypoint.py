@@ -193,9 +193,6 @@ def main(
             credentials_dict,
             scopes=["https://www.googleapis.com/auth/cloud-platform"]
         )
-        credentials = Credentials.from_service_account_file(
-            service_account_file,
-        )
         genai.configure(credentials=credentials)
     else:
         genai.configure(api_key=api_key)
