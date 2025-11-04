@@ -94,6 +94,7 @@ runs:
   image: Dockerfile
   env:
     GEMINI_API_KEY: ${{ inputs.gemini_api_key }}
+    GEMINI_SERVICE_ACCOUNT_FILE: ${{ inputs.gemini_service_account_file }}
     GITHUB_TOKEN: ${{ inputs.github_token }}
     GITHUB_REPOSITORY: ${{ inputs.github_repository }}
     GITHUB_PULL_REQUEST_NUMBER: ${{ inputs.github_pull_request_number }}
