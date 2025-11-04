@@ -19,10 +19,11 @@ import requests
 from loguru import logger
 from google.auth.transport.requests import Request
 
+
 def check_required_env_vars():
     """Check required environment variables"""
     required_env_vars = [
-        "GEMINI_API_KEY",
+        # "GEMINI_API_KEY",
         "GITHUB_TOKEN",
         "GITHUB_REPOSITORY",
         "GITHUB_PULL_REQUEST_NUMBER",
@@ -195,7 +196,7 @@ def main(
         )
         credentials.refresh(Request())
         access_token = credentials.token
-        genai.configure(api_key=access_token)
+        genai.configure(access_token=access_token)
     else:
         genai.configure(api_key=api_key)
 
