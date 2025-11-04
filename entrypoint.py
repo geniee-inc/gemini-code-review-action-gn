@@ -13,11 +13,12 @@ import json
 import os
 from typing import List
 import click
-import google.generativeai as genai
+# import google.generativeai as genai
+from vertexai.generative_models import GenerativeModel
+import vertexai
 from google.oauth2.service_account import Credentials
 import requests
 from loguru import logger
-from google.auth.transport.requests import Request
 
 
 def check_required_env_vars():
@@ -107,7 +108,7 @@ def get_review(
         "top_k": 0,
         "max_output_tokens": 8192,
     }
-    genai_model = genai.GenerativeModel(model_name=model, generation_config=generation_config, system_instruction=extra_prompt)
+    genai_model = GenerativeModel(model_name=model, generation_config=generation_config, system_instruction=extra_prompt)
     # Get summary by chunk
     chunked_reviews = []
     for chunked_diff in chunked_diff_list:
@@ -194,11 +195,12 @@ def main(
             credentials_dict,
             scopes=["https://www.googleapis.com/auth/cloud-platform"]
         )
-        credentials.refresh(Request())
-        access_token = credentials.token
-        genai.configure(access_token=access_token)
+        project_id = credentials_dict.get("project_id")
+        location = credentials_dict.get("location")
+        vertexai.init(project=project_id, location=location, credentials=credentials)
     else:
-        genai.configure(api_key=api_key)
+        # genai.configure(api_key=api_key)
+        vertexai.init(credentials=credentials)
 
     # Request a code review
     chunked_reviews, summarized_review = get_review(
