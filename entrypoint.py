@@ -17,7 +17,7 @@ import google.generativeai as genai
 from google.oauth2.service_account import Credentials
 import requests
 from loguru import logger
-
+from google.auth.transport.requests import Request
 
 def check_required_env_vars():
     """Check required environment variables"""
@@ -193,7 +193,9 @@ def main(
             credentials_dict,
             scopes=["https://www.googleapis.com/auth/cloud-platform"]
         )
-        genai.configure(credentials=credentials)
+        credentials.refresh(Request())
+        access_token = credentials.token
+        genai.configure(api_key=access_token)
     else:
         genai.configure(api_key=api_key)
 
